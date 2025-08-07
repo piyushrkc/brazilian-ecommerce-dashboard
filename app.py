@@ -1263,7 +1263,7 @@ def create_confusion_matrix():
         z=matrix_data,
         text=labels,
         texttemplate="%{text}",
-        textfont={"size":12, "color":"white", "family":"Arial", "weight":"bold"},  # Clear, bold font
+        textfont={"size":12, "color":"white", "family":"Arial"},  # Clear font
         colorscale=[[0, '#ffebee'], [1, '#c62828']],  # Better contrast colors
         showscale=False
     ))
