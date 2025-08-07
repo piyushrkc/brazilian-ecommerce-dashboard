@@ -20,9 +20,10 @@ import os
 import json
 
 # Initialize Dash app with server variable for deployment
-app = dash.Dash(__name__, suppress_callback_exceptions=True)
-server = app.server  # This is required for deployment
-app.title = "Brazilian E-Commerce Analysis Dashboard"
+dash_app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = dash_app.server  # This is required for deployment
+app = server  # For gunicorn compatibility
+dash_app.title = "Brazilian E-Commerce Analysis Dashboard"
 
 # Brazilian states coordinates for map visualization
 BRAZIL_STATES_COORDS = {
@@ -1189,7 +1190,7 @@ def predict_satisfaction(is_late, delay_days, delivery_days, freight_ratio, pric
     return min(max(base_prob, 0), 1)
 
 # Define the layout with all visualizations
-app.layout = html.Div([
+dash_app.layout = html.Div([
     # Header
     html.Div([
         html.H1("Brazilian E-Commerce Analysis Dashboard", 
@@ -1722,7 +1723,7 @@ app.layout = html.Div([
 ], style={'fontFamily': 'Arial, sans-serif', 'maxWidth': '1400px', 'margin': '0 auto', 'padding': '20px'})
 
 # Callback for document viewer
-@app.callback(
+@dash_app.callback(
     Output('doc-content', 'children'),
     Input('doc-selector', 'value')
 )
@@ -1749,7 +1750,7 @@ def display_document(filename):
         ])
 
 # Callback for prediction
-@app.callback(
+@dash_app.callback(
     Output('prediction-result', 'children'),
     Input('predict-button', 'n_clicks'),
     State('pred-is-late', 'value'),
@@ -1796,7 +1797,7 @@ if __name__ == '__main__':
     # Get port from environment variable (for deployment) or use 8050
     port = int(os.environ.get('PORT', 8050))
     
-    app.run(
+    dash_app.run(
         debug=False,
         host='0.0.0.0',
         port=port
