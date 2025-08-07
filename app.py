@@ -1511,19 +1511,19 @@ def create_enhanced_confusion_matrix():
     business_impact = [
         ['True Negatives<br>921 (4.8%)<br>Correctly identified low reviews<br>Successful Interventions', 
          'False Positives<br>3,140 (16.3%)<br>Incorrectly flagged as low<br>Intervention Cost: R$ 31,400'],
-        ['False Negatives<br>253 (1.3%)<br>Missed low reviews<br>Lost Opportunity: R$ 11,385', 
-         'True Positives<br>14,957 (77.6%)<br>Correctly identified high reviews<br>No Action Needed']
+        ['<b>False Negatives</b><br>253 (1.3%)<br>Missed low reviews<br>Lost Opportunity: R$ 11,385', 
+         '<b>True Positives</b><br>14,957 (77.6%)<br>Correctly identified high reviews<br>No Action Needed']
     ]
     
     for i, row in enumerate(cm_data):
         for j, value in enumerate(row):
-            color = 'white' if (i == j and value > 3000) else 'black'
+            # Use black text for better readability
             annotations.append(
                 dict(
                     x=j, y=i,
                     text=business_impact[i][j],
                     showarrow=False,
-                    font=dict(color=color, size=11),
+                    font=dict(color='black', size=11),
                     xanchor='center',
                     yanchor='middle'
                 )
@@ -1533,12 +1533,12 @@ def create_enhanced_confusion_matrix():
         z=cm_data,
         x=labels,
         y=actual_labels,
-        colorscale=[[0, '#27ae60'], [0.3, '#f39c12'], [0.7, '#e67e22'], [1, '#e74c3c']],
-        text=[[f'{cm_data[i][j]:,}' for j in range(len(cm_data[0]))] for i in range(len(cm_data))],
-        texttemplate='%{text}',
-        textfont=dict(size=14, color='white'),
+        colorscale=[[0, '#f8f9fa'], [0.3, '#e3f2fd'], [0.7, '#bbdefb'], [1, '#90caf9']],
         showscale=False,
-        hovertemplate='<b>%{y} vs %{x}</b><br>Count: %{z:,}<br>Percentage: %{text}<extra></extra>'
+        hovertemplate='<b>%{y} vs %{x}</b><br>Count: %{z:,}<br><extra></extra>',
+        # Remove text to eliminate overlapping numbers
+        text=None,
+        texttemplate=None
     ))
     
     fig.update_layout(
