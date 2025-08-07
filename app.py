@@ -1744,11 +1744,7 @@ dash_app.layout = html.Div([
     
     # Footer
     html.Div([
-        html.Hr(),
-        html.P(f"Dashboard generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 
-               style={'textAlign': 'center', 'color': '#7f8c8d'}),
-        html.P("Human analysis with limited (20-25%) AI assistance for technical implementation", 
-               style={'textAlign': 'center', 'color': '#95a5a6', 'fontSize': 12, 'marginTop': 15})
+        html.Hr()
     ], style={'textAlign': 'center', 'padding': '20px'})
 ], style={'fontFamily': 'Arial, sans-serif', 'maxWidth': '1400px', 'margin': '0 auto', 'padding': '20px'})
 
