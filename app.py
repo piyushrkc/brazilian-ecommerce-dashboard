@@ -1148,59 +1148,48 @@ def create_geo_chart(df):
     return fig
 
 def create_geo_map(df):
-    """Create interactive map of Brazil showing revenue distribution with boundaries"""
-    # Since choropleth might have issues, let's use a bubble map with better styling
+    """Create choropleth map of Brazil showing revenue distribution with state boundaries"""
+    
+    # Map our state abbreviations to names that match geojson properties
+    state_full_names = {
+        'SP': 'São Paulo', 'RJ': 'Rio de Janeiro', 'MG': 'Minas Gerais',
+        'RS': 'Rio Grande do Sul', 'PR': 'Paraná', 'BA': 'Bahia', 
+        'SC': 'Santa Catarina', 'GO': 'Goiás', 'DF': 'Distrito Federal',
+        'ES': 'Espírito Santo'
+    }
     
     fig = go.Figure()
     
-    # Add bubble markers for each state
-    fig.add_trace(go.Scattergeo(
-        lon=df['lon'],
-        lat=df['lat'],
-        text=df['state_name'],
-        mode='markers+text',
-        marker=dict(
-            size=df['revenue_share'] * 3,
-            color=df['revenue_share'],
-            colorscale='Reds',
-            cmin=0,
-            cmax=40,
-            colorbar=dict(
-                title="Revenue Share %",
-                titleside="right",
-                tickmode="linear",
-                tick0=0,
-                dtick=10
-            ),
-            line=dict(width=2, color='white'),
-            sizemode='diameter',
-            sizeref=2.*max(df['revenue_share'])/50.**2,
-            sizemin=4
+    # Create choropleth map using Plotly's built-in Brazil geojson
+    fig.add_trace(go.Choropleth(
+        locations=df['state'],
+        z=df['revenue_share'],
+        locationmode='geojson-id',
+        geojson='https://raw.githubusercontent.com/holtzy/The-Python-Graph-Gallery/master/static/data/brazil-states.geojson',
+        featureidkey='properties.sigla',  # Use state abbreviations (SP, RJ, etc.)
+        colorscale='Reds',
+        colorbar=dict(
+            title=dict(text="Revenue Share (%)", font=dict(size=12)),
+            thickness=15,
+            len=0.8,
+            x=1.02
         ),
-        textfont=dict(size=10, color='darkblue'),
-        textposition='middle center',
-        customdata=np.column_stack((df['revenue_share'], df['order_count'], df['avg_order_value'])),
+        marker_line_color='white',
+        marker_line_width=1.5,
+        text=[f"{state_full_names[state]} ({share:.1f}%)" for state, share in zip(df['state'], df['revenue_share'])],
         hovertemplate='<b>%{text}</b><br>' +
-                      'Revenue Share: %{customdata[0]:.1f}%<br>' +
-                      'Orders: %{customdata[1]:,}<br>' +
-                      'Avg Order: R$ %{customdata[2]:.2f}<br>' +
+                      'Revenue Share: %{z:.1f}%<br>' + 
                       '<extra></extra>'
     ))
     
     fig.update_geos(
-        resolution=50,
-        showland=True,
-        landcolor='rgb(243, 243, 243)',
-        countrycolor='rgb(204, 204, 204)',
-        coastlinecolor='rgb(204, 204, 204)',
-        projection_type='natural earth',
-        lonaxis_range=[-75, -30],
-        lataxis_range=[-35, 5],
-        center=dict(lat=-15.7801, lon=-47.9292)
+        fitbounds="locations",
+        visible=False,
+        projection_type='mercator'
     )
     
     fig.update_layout(
-        title="Revenue Distribution Across Brazilian States - Geographic Map",
+        title="Revenue Distribution Across Brazilian States - Choropleth Map",
         height=500,
         margin=dict(l=0, r=0, t=50, b=0)
     )
@@ -1566,10 +1555,10 @@ dash_app.layout = html.Div([
                 
                 # Map Explanation
                 html.Div([
-                    html.H5("Geographic Revenue Distribution Analysis", style={'color': '#2c3e50', 'marginTop': '15px'}),
-                    html.P("This geographic map shows revenue distribution across Brazilian states using bubble size and color intensity. Larger, darker red bubbles indicate higher revenue concentration, while smaller, lighter bubbles represent lower market penetration. Each bubble is positioned at the geographic center of the state.", 
+                    html.H5("Choropleth Map Analysis", style={'color': '#2c3e50', 'marginTop': '15px'}),
+                    html.P("This choropleth map shows revenue distribution across Brazilian states using color intensity to represent market concentration. Darker red shades indicate higher revenue concentration, while lighter shades represent lower market penetration. State boundaries are clearly defined with accurate geographic representation of Brazil.", 
                            style={'fontSize': '14px', 'color': '#7f8c8d', 'lineHeight': '1.5'}),
-                    html.P("Strategic Risk: São Paulo's large, dark red bubble (37.4% of total revenue) creates dangerous geographic concentration. The dramatic size difference between São Paulo and other states reveals over-dependence on a single market, requiring immediate expansion to Rio de Janeiro (12.8%) and Minas Gerais (11.9%) plus new market development.",
+                    html.P("Strategic Risk: São Paulo's dark red coloring (37.4% of total revenue) creates dangerous geographic concentration. The stark contrast with other states reveals over-dependence on a single market, requiring immediate expansion to Rio de Janeiro (12.8%) and Minas Gerais (11.9%) plus new market development.",
                            style={'fontSize': '14px', 'color': '#e74c3c', 'fontWeight': 'bold', 'lineHeight': '1.5'})
                 ], style={'padding': '15px', 'backgroundColor': '#f8f9fa', 'borderRadius': '8px', 'marginBottom': '30px', 'border': '1px solid #dee2e6'}),
                 
