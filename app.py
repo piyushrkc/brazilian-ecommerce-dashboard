@@ -1255,26 +1255,36 @@ def create_confusion_matrix():
     
     # Create heatmap data
     matrix_data = [[tp, fn], [fp, tn]]
-    labels = [['True Positive<br>15,234', 'False Negative<br>1,298'], 
-              ['False Positive<br>2,156', 'True Negative<br>29,845']]
+    # Use much shorter labels to prevent overlap
+    labels = [['TP<br>15,234', 'FN<br>1,298'], 
+              ['FP<br>2,156', 'TN<br>29,845']]
     
     fig = go.Figure(data=go.Heatmap(
         z=matrix_data,
         text=labels,
         texttemplate="%{text}",
-        textfont={"size":14},
-        colorscale=[[0, '#e8f5e8'], [1, '#27ae60']],
+        textfont={"size":12, "color":"white", "family":"Arial", "weight":"bold"},  # Clear, bold font
+        colorscale=[[0, '#ffebee'], [1, '#c62828']],  # Better contrast colors
         showscale=False
     ))
     
     fig.update_layout(
         title="Model Confusion Matrix<br><sub>92.7% Overall Accuracy</sub>",
         xaxis_title="Predicted",
-        yaxis_title="Actual",
-        xaxis=dict(tickvals=[0, 1], ticktext=['Low Satisfaction', 'High Satisfaction']),
-        yaxis=dict(tickvals=[0, 1], ticktext=['Low Satisfaction', 'High Satisfaction']),
-        height=400,
-        width=400
+        yaxis_title="Actual", 
+        xaxis=dict(
+            tickvals=[0, 1], 
+            ticktext=['Low Satisfaction', 'High Satisfaction'],
+            tickfont=dict(size=10)
+        ),
+        yaxis=dict(
+            tickvals=[0, 1], 
+            ticktext=['Low Satisfaction', 'High Satisfaction'],
+            tickfont=dict(size=10)
+        ),
+        height=450,  # Increased height for better proportion
+        width=450,   # Increased width for better proportion
+        margin=dict(l=80, r=20, t=80, b=80)  # Better margins
     )
     
     return fig
