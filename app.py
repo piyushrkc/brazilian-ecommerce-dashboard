@@ -86,7 +86,6 @@ This dashboard presents a comprehensive analysis of Brazilian e-commerce data wi
 3. Implement tiered performance management system
 
 ## Technical Details
-- Human-developed analysis with 20-25% AI assistance for syntax
 - Built with Python, Pandas, Plotly, and Dash
 - Fully reproducible analysis pipeline
 """,
@@ -1226,9 +1225,7 @@ dash_app.layout = html.Div([
         html.H1("Brazilian E-Commerce Analysis Dashboard", 
                style={'textAlign': 'center', 'color': '#2c3e50', 'marginBottom': 10}),
         html.P("Comprehensive Analysis with Delivery Performance, Customer Segmentation, and Predictive Insights",
-               style={'textAlign': 'center', 'color': '#7f8c8d', 'fontSize': 18}),
-        html.P("Human-developed analysis with 20-25% AI assistance for technical syntax",
-               style={'textAlign': 'center', 'color': '#95a5a6', 'fontSize': 14, 'fontStyle': 'italic'})
+               style={'textAlign': 'center', 'color': '#7f8c8d', 'fontSize': 18})
     ], style={'backgroundColor': '#ecf0f1', 'padding': '20px', 'marginBottom': '20px'}),
     
     # Key Metrics Row
