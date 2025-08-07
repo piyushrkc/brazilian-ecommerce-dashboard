@@ -1279,32 +1279,48 @@ def create_feature_importance_chart():
     
     return fig
 
-def predict_satisfaction(is_late, delay_days, delivery_days, freight_ratio, price, items):
+def predict_satisfaction(state, expected_days, delivery_days, freight_ratio, price, items):
     """
-    Simplified prediction function based on our model's feature importance
+    Predict customer satisfaction risk based on order characteristics and location
     Returns probability of low satisfaction (1-3 stars)
     """
-    # Base probability
-    base_prob = 0.13  # 13% baseline for low satisfaction
+    # Base probability varies by state (logistics infrastructure quality)
+    state_risk = {
+        'SP': 0.12,  # Best logistics infrastructure
+        'RJ': 0.14,  # Good infrastructure  
+        'MG': 0.15,  # Moderate infrastructure
+        'RS': 0.16,  # Moderate infrastructure
+        'PR': 0.17,  # Moderate infrastructure
+        'SC': 0.16,  # Moderate infrastructure
+        'BA': 0.19,  # Challenging logistics
+        'DF': 0.15,  # Government hub, decent
+        'OTHER': 0.22  # Remote states with poor logistics
+    }
     
-    # Adjust based on features (simplified version of the actual model)
-    if is_late:
-        base_prob += 0.45  # Being late dramatically increases dissatisfaction
+    base_prob = state_risk.get(state, 0.18)
     
-    if delay_days > 0:
-        base_prob += min(delay_days * 0.05, 0.3)  # Each day adds 5%, max 30%
+    # Calculate if order will likely be late based on expectations
+    is_likely_late = delivery_days > expected_days
+    delay_estimate = max(0, delivery_days - expected_days)
+    
+    # Adjust based on delivery performance expectations
+    if is_likely_late:
+        base_prob += 0.35  # Late deliveries significantly increase dissatisfaction
+    
+    if delay_estimate > 0:
+        base_prob += min(delay_estimate * 0.04, 0.25)  # Each delay day adds risk
     
     if delivery_days > 15:
-        base_prob += 0.15  # Long delivery times increase dissatisfaction
+        base_prob += 0.12  # Long delivery times increase dissatisfaction
     
     if freight_ratio > 0.3:
         base_prob += 0.10  # High freight costs relative to price
     
     if price < 50:
-        base_prob += 0.05  # Low-value orders slightly more likely to complain
+        base_prob += 0.05  # Low-value orders more likely to generate complaints
     
     if items > 5:
-        base_prob += 0.05  # Complex orders with many items
+        base_prob += 0.05  # Complex orders with many items have higher risk
     
     # Ensure probability is between 0 and 1
     return min(max(base_prob, 0), 1)
@@ -1565,25 +1581,32 @@ dash_app.layout = html.Div([
                         # Input fields
                         html.Div([
                             html.Div([
-                                html.Label("Will the order be delivered late?", style={'fontWeight': 'bold'}),
+                                html.Label("Customer State:", style={'fontWeight': 'bold'}),
                                 dcc.Dropdown(
-                                    id='pred-is-late',
+                                    id='pred-customer-state',
                                     options=[
-                                        {'label': 'No - On time', 'value': 0},
-                                        {'label': 'Yes - Late', 'value': 1}
+                                        {'label': 'São Paulo (SP)', 'value': 'SP'},
+                                        {'label': 'Rio de Janeiro (RJ)', 'value': 'RJ'},
+                                        {'label': 'Minas Gerais (MG)', 'value': 'MG'},
+                                        {'label': 'Rio Grande do Sul (RS)', 'value': 'RS'},
+                                        {'label': 'Paraná (PR)', 'value': 'PR'},
+                                        {'label': 'Santa Catarina (SC)', 'value': 'SC'},
+                                        {'label': 'Bahia (BA)', 'value': 'BA'},
+                                        {'label': 'Distrito Federal (DF)', 'value': 'DF'},
+                                        {'label': 'Other States', 'value': 'OTHER'}
                                     ],
-                                    value=0,
+                                    value='SP',
                                     style={'width': '100%'}
                                 )
                             ], style={'marginBottom': '15px'}),
                             
                             html.Div([
-                                html.Label("Delay days (if late):", style={'fontWeight': 'bold'}),
+                                html.Label("Expected delivery days:", style={'fontWeight': 'bold'}),
                                 dcc.Input(
-                                    id='pred-delay-days',
+                                    id='pred-expected-days',
                                     type='number',
-                                    value=0,
-                                    min=0,
+                                    value=10,
+                                    min=1,
                                     max=30,
                                     style={'width': '100%'}
                                 )
@@ -1871,20 +1894,20 @@ def display_document(filename):
 @dash_app.callback(
     Output('prediction-result', 'children'),
     Input('predict-button', 'n_clicks'),
-    State('pred-is-late', 'value'),
-    State('pred-delay-days', 'value'),
+    State('pred-customer-state', 'value'),
+    State('pred-expected-days', 'value'),
     State('pred-delivery-days', 'value'),
     State('pred-freight-ratio', 'value'),
     State('pred-price', 'value'),
     State('pred-items', 'value')
 )
-def make_prediction(n_clicks, is_late, delay_days, delivery_days, freight_ratio, price, items):
+def make_prediction(n_clicks, state, expected_days, delivery_days, freight_ratio, price, items):
     """Make prediction based on user inputs"""
     if n_clicks is None:
         return ""
     
     # Get prediction
-    prob = predict_satisfaction(is_late, delay_days, delivery_days, freight_ratio, price, items)
+    prob = predict_satisfaction(state, expected_days, delivery_days, freight_ratio, price, items)
     risk_pct = prob * 100
     
     # Determine risk level and color
