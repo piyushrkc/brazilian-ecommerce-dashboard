@@ -6,7 +6,9 @@
       "Bash(timeout:*)",
       "Bash(chmod:*)",
       "Bash(cp:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
