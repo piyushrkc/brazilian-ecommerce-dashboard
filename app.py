@@ -1050,11 +1050,32 @@ def create_geo_chart(df):
     return fig
 
 def create_geo_map(df):
-    """Create interactive map of Brazil showing revenue distribution"""
+    """Create interactive map of Brazil showing revenue distribution with boundaries"""
     # Create size values for bubbles (scaled for visibility)
     df['bubble_size'] = df['revenue_share'] * 3
     
     fig = go.Figure()
+    
+    # Add choropleth layer for Brazil boundaries
+    fig.add_trace(go.Choropleth(
+        geojson="https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson",
+        locations=df['state'],
+        z=df['revenue_share'],
+        locationmode='geojson-id',
+        colorscale='Blues',
+        marker_line_color='darkgray',
+        marker_line_width=1,
+        colorbar=dict(
+            title="Revenue Share %",
+            x=1.1,
+            len=0.5,
+            y=0.8
+        ),
+        hovertemplate='<b>%{text}</b><br>' +
+                      'Revenue Share: %{z:.1f}%<br>' +
+                      '<extra></extra>',
+        showscale=False
+    ))
     
     # Add scatter markers for each state
     fig.add_trace(go.Scattergeo(
@@ -1072,10 +1093,11 @@ def create_geo_map(df):
                 title="Revenue Share %",
                 x=1.1
             ),
-            line=dict(width=1, color='black')
+            line=dict(width=2, color='darkred'),
+            opacity=0.8
         ),
         textposition='top center',
-        textfont=dict(size=10, color='black'),
+        textfont=dict(size=11, color='black', family='Arial Black'),
         customdata=np.column_stack((df['revenue_share'], df['order_count'], df['avg_order_value'])),
         hovertemplate='<b>%{text}</b><br>' +
                       'Revenue Share: %{customdata[0]:.1f}%<br>' +
@@ -1088,16 +1110,24 @@ def create_geo_map(df):
         center=dict(lat=-15.7801, lon=-47.9292),  # Center of Brazil
         projection_scale=4,
         showland=True,
-        landcolor='rgb(243, 243, 243)',
-        coastlinecolor='rgb(204, 204, 204)',
+        landcolor='rgb(240, 240, 240)',
+        coastlinecolor='rgb(50, 50, 50)',
+        coastlinewidth=2,
         showlakes=True,
-        lakecolor='rgb(255, 255, 255)',
+        lakecolor='rgb(200, 220, 255)',
         showcountries=True,
-        countrycolor='rgb(204, 204, 204)',
+        countrycolor='rgb(50, 50, 50)',
+        countrywidth=2,
         showocean=True,
-        oceancolor='rgb(230, 245, 255)',
+        oceancolor='rgb(210, 230, 255)',
+        showsubunits=True,
+        subunitcolor='rgb(100, 100, 100)',
+        subunitwidth=1,
         lataxis_range=[-35, 5],
-        lonaxis_range=[-75, -35]
+        lonaxis_range=[-75, -30],
+        showframe=True,
+        framecolor='rgb(50, 50, 50)',
+        framewidth=2
     )
     
     fig.update_layout(
