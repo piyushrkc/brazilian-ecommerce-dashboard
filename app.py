@@ -41,54 +41,6 @@ BRAZIL_STATES_COORDS = {
 
 # Embedded documentation content (for deployment without file access)
 EMBEDDED_DOCS = {
-    'README.md': """# Brazilian E-Commerce Analysis Dashboard
-
-## Overview
-This dashboard presents a comprehensive analysis of Brazilian e-commerce data with insights on:
-- Delivery performance across product categories
-- Customer segmentation using RFM analysis
-- Geographic distribution and concentration risks
-- Predictive model for customer satisfaction
-- Strategic recommendations for business growth
-
-## Key Findings
-
-### Delivery Performance
-- Overall late delivery rate: 6.8%
-- Category variance: 2.1% to 45.2%
-- Audio and Christmas supplies have highest late rates (>10%)
-
-### Customer Retention Crisis
-- 97.2% are one-time customers
-- Only 2.8% make repeat purchases
-- Urgent need for retention programs
-
-### Geographic Concentration
-- São Paulo dominates with 37.4% of revenue
-- São Paulo (41.8%), Rio de Janeiro (17.7%), and Minas Gerais (13.0%) account for 72.5% of total revenue
-- High business risk from geographic concentration
-
-### Predictive Model
-- 92.7% accuracy in predicting customer satisfaction
-- F1-Score: 93.7%
-- Expected ROI: 234.8% on intervention costs
-
-## Strategic Recommendations
-
-### Quick Wins (30 days)
-1. Launch At-Risk customer win-back campaign (R$ 2.1M CLV at stake)
-2. Implement category-specific delivery SLAs
-3. Start São Paulo seller performance review
-
-### Strategic Initiatives (90 days)
-1. Deploy predictive model for proactive customer service
-2. Launch regional seller recruitment program
-3. Implement tiered performance management system
-
-## Technical Details
-- Built with Python, Pandas, Plotly, and Dash
-- Fully reproducible analysis pipeline
-""",
     
     'Strategic_Analysis_Report.md': """# Strategic Analysis Report
 ## Brazilian E-Commerce Insights for Head of Seller Relations
@@ -1150,48 +1102,59 @@ def create_geo_chart(df):
 def create_geo_map(df):
     """Create choropleth map of Brazil showing revenue distribution with state boundaries"""
     
-    # Map our state abbreviations to names that match geojson properties
-    state_full_names = {
-        'SP': 'São Paulo', 'RJ': 'Rio de Janeiro', 'MG': 'Minas Gerais',
-        'RS': 'Rio Grande do Sul', 'PR': 'Paraná', 'BA': 'Bahia', 
-        'SC': 'Santa Catarina', 'GO': 'Goiás', 'DF': 'Distrito Federal',
-        'ES': 'Espírito Santo'
-    }
+    # Create a proper choropleth using scattermapbox with OpenStreetMap tiles
+    import json
+    import urllib.request
     
-    fig = go.Figure()
+    # Load Brazil states GeoJSON
+    geojson_url = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson'
+    with urllib.request.urlopen(geojson_url) as response:
+        brazil_geojson = json.loads(response.read())
     
-    # Create choropleth map using Plotly's built-in Brazil geojson
-    fig.add_trace(go.Choropleth(
+    # Create a mapping of state codes to revenue share
+    state_revenue_map = dict(zip(df['state'], df['revenue_share']))
+    
+    # Add revenue data to each feature
+    for feature in brazil_geojson['features']:
+        state_code = feature['properties'].get('sigla', '')
+        if state_code in state_revenue_map:
+            feature['properties']['revenue_share'] = state_revenue_map[state_code]
+        else:
+            feature['properties']['revenue_share'] = 0
+    
+    # Create the choropleth using choroplethmapbox
+    fig = go.Figure(go.Choroplethmapbox(
+        geojson=brazil_geojson,
         locations=df['state'],
         z=df['revenue_share'],
-        locationmode='geojson-id',
-        geojson='https://raw.githubusercontent.com/holtzy/The-Python-Graph-Gallery/master/static/data/brazil-states.geojson',
-        featureidkey='properties.sigla',  # Use state abbreviations (SP, RJ, etc.)
+        featureidkey="properties.sigla",
         colorscale='Reds',
+        zmin=0,
+        zmax=40,
+        marker_opacity=0.7,
+        marker_line_width=1,
+        marker_line_color='white',
         colorbar=dict(
-            title=dict(text="Revenue Share (%)", font=dict(size=12)),
+            title="Revenue Share (%)",
             thickness=15,
             len=0.8,
-            x=1.02
+            x=0.98
         ),
-        marker_line_color='white',
-        marker_line_width=1.5,
-        text=[f"{state_full_names[state]} ({share:.1f}%)" for state, share in zip(df['state'], df['revenue_share'])],
+        text=[f"{row['state_name']} ({row['revenue_share']:.1f}%)" for _, row in df.iterrows()],
         hovertemplate='<b>%{text}</b><br>' +
-                      'Revenue Share: %{z:.1f}%<br>' + 
+                      'Revenue Share: %{z:.1f}%<br>' +
                       '<extra></extra>'
     ))
     
-    fig.update_geos(
-        fitbounds="locations",
-        visible=False,
-        projection_type='mercator'
-    )
-    
     fig.update_layout(
         title="Revenue Distribution Across Brazilian States - Choropleth Map",
-        height=500,
-        margin=dict(l=0, r=0, t=50, b=0)
+        mapbox=dict(
+            style="open-street-map",
+            zoom=3.5,
+            center=dict(lat=-15.7801, lon=-47.9292)
+        ),
+        margin=dict(l=0, r=0, t=50, b=0),
+        height=500
     )
     
     return fig
@@ -2083,11 +2046,9 @@ dash_app.layout = html.Div([
                             {'label': 'Strategic Analysis Report', 
                              'value': 'Strategic_Analysis_Report.md'},
                             {'label': 'LLM Usage Documentation', 
-                             'value': 'LLM_USAGE_DOCUMENTATION.md'},
-                            {'label': 'README - Setup Guide', 
-                             'value': 'README.md'}
+                             'value': 'LLM_USAGE_DOCUMENTATION.md'}
                         ],
-                        value='README.md',
+                        value='Strategic_Analysis_Report.md',
                         style={'width': '600px'}
                     )
                 ], style={'margin': '20px 0'}),
