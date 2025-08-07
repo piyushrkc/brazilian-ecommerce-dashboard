@@ -5,7 +5,8 @@
       "Bash(pip install:*)",
       "Bash(timeout:*)",
       "Bash(chmod:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
