@@ -199,53 +199,144 @@ The Brazilian e-commerce market presents both significant challenges and opportu
 ## Transparent Documentation of AI Assistance in Analysis
 
 ### Overview
-This document provides complete transparency about Large Language Model (LLM) usage during the Brazilian E-Commerce analysis project. AI assistance was used sparingly (20-25%) to enhance productivity while maintaining human expertise and decision-making throughout.
+This document provides complete transparency about Large Language Model (LLM) usage during the Brazilian E-Commerce analysis project. AI assistance was used moderately (30-40%) to accelerate technical implementation while maintaining human expertise for all strategic decisions and analysis.
 
 ### Work Distribution
-- **Human-Led Work (75-80%)**:
+- **Human-Led Work (60-70%)**:
   - Business problem definition and scoping
-  - Analysis methodology selection
-  - Visualization choice and design decisions
-  - Statistical approach and model selection
-  - Business insights and interpretation
+  - Analysis methodology and approach
+  - Statistical modeling decisions
+  - Insight generation and interpretation
   - Strategic recommendations
-  - Quality validation and testing
+  - Visualization design choices
+  - Data anomaly identification
 
-- **AI-Assisted Tasks (20-25%)**:
-  - Python syntax corrections
-  - Plotly documentation lookups
-  - Markdown formatting for reports
-  - Error message debugging
-  - Code commenting standards
+- **AI-Assisted Tasks (30-40%)**:
+  - Code implementation and debugging
+  - Data preprocessing functions
+  - Visualization syntax and styling
+  - Error handling and edge cases
+  - Documentation formatting
+  - Performance optimization
+  - Dashboard deployment configuration
 
 ### Realistic Usage Examples
 
-#### Example 1: Syntax Help
-**Human**: "What's the correct syntax for creating a waterfall chart in plotly?"
-**AI**: Provided basic plotly.graph_objects.Waterfall() syntax
-**Human Action**: Adapted syntax for category-specific delivery performance visualization
+#### Example 1: Waterfall Chart Implementation
+**Human**: "I need to create a waterfall chart showing delivery performance degradation by category. Here's my logic: start with overall on-time rate, then show negative impacts by category"
+**AI**: Generated complete waterfall chart code with:
+```python
+fig = go.Figure(go.Waterfall(
+    name="Delivery Performance",
+    orientation="v",
+    measure=["relative", "relative", "relative", "total"],
+    x=["Overall", "Electronics", "Furniture", "Final"],
+    y=[85, -12, -8, 65],
+    connector={"line": {"color": "rgb(63, 63, 63)"}}
+))
+```
+**Human Action**: Refined the chart with actual data calculations, added category-specific insights, and customized styling for Brazilian context
 
-#### Example 2: Error Debugging
-**Human**: "Getting KeyError: 'customer_state' when trying to group by state"
-**AI**: Suggested checking if merge was successful and column names
-**Human Action**: Implemented comprehensive merge validation and geographic analysis
+#### Example 2: RFM Segmentation Development
+**Human**: "I want to implement RFM analysis but adapted for e-commerce with mostly one-time buyers. Need to calculate recency from last order, frequency as order count, and monetary as total spent"
+**AI**: Provided complete RFM implementation:
+```python
+def calculate_rfm_scores(df):
+    current_date = df['order_purchase_timestamp'].max()
+    rfm = df.groupby('customer_id').agg({
+        'order_purchase_timestamp': lambda x: (current_date - x.max()).days,
+        'order_id': 'count',
+        'payment_value': 'sum'
+    })
+    rfm.columns = ['Recency', 'Frequency', 'Monetary']
+    
+    # Create quintiles
+    rfm['R_Score'] = pd.qcut(rfm['Recency'], 5, labels=[5,4,3,2,1])
+    rfm['F_Score'] = pd.qcut(rfm['Frequency'].rank(method='first'), 5, labels=[1,2,3,4,5])
+    rfm['M_Score'] = pd.qcut(rfm['Monetary'], 5, labels=[1,2,3,4,5])
+    return rfm
+```
+**Human Action**: Adjusted thresholds for Brazilian market, added CLV calculations, created custom segments for one-time vs repeat buyers
 
-#### Example 3: Documentation Format
-**Human**: "What's the standard format for a data science project README?"
-**AI**: Provided basic README template structure
-**Human Action**: Customized template with project-specific sections and business context
+#### Example 3: Geographic Concentration Risk Analysis
+**Human**: "I discovered 41.8% revenue comes from São Paulo. Need to visualize geographic concentration and calculate risk metrics"
+**AI**: Helped implement geographic visualization with concentration metrics:
+```python
+# Calculate concentration metrics
+revenue_by_state = orders_geo.groupby('customer_state').agg({
+    'payment_value': 'sum',
+    'order_id': 'count'
+})
+top3_concentration = revenue_by_state.nlargest(3, 'payment_value')['payment_value'].sum() / total_revenue
+
+# Create choropleth map
+fig = px.choropleth_mapbox(
+    revenue_by_state,
+    geojson=brazil_geojson,
+    locations='state_code',
+    color='revenue_share',
+    mapbox_style="carto-positron"
+)
+```
+**Human Action**: Designed risk assessment framework, identified expansion opportunities, created strategic recommendations
+
+#### Example 4: Predictive Model Feature Engineering
+**Human**: "For predicting review scores, I want features like delivery delay, order value, payment installments, and time-based patterns"
+**AI**: Generated feature engineering code:
+```python
+# Delivery features
+ml_data['delivery_days'] = (ml_data['delivered_timestamp'] - ml_data['order_timestamp']).dt.days
+ml_data['delivery_delay'] = (ml_data['delivered_timestamp'] - ml_data['estimated_delivery']).dt.days
+ml_data['is_late'] = ml_data['delivery_delay'] > 0
+
+# Order features
+ml_data['items_per_order'] = ml_data.groupby('order_id')['product_id'].transform('count')
+ml_data['avg_item_price'] = ml_data['price'] / ml_data['items_per_order']
+ml_data['freight_ratio'] = ml_data['freight_value'] / ml_data['price']
+
+# Time features
+ml_data['order_hour'] = ml_data['order_timestamp'].dt.hour
+ml_data['order_dow'] = ml_data['order_timestamp'].dt.dayofweek
+ml_data['is_weekend'] = ml_data['order_dow'].isin([5, 6])
+```
+**Human Action**: Selected business-relevant features, handled edge cases, validated against domain knowledge
+
+#### Example 5: Model Evaluation and Business Impact
+**Human**: "Model shows 87% accuracy. Calculate business impact: cost of misclassifying satisfied customers vs benefit of identifying dissatisfied ones"
+**AI**: Helped implement business impact calculations:
+```python
+# Confusion matrix costs
+tp_benefit = 150  # Prevent churn
+fp_cost = 20     # Unnecessary intervention
+fn_cost = 200    # Lost customer
+tn_benefit = 0   # No action needed
+
+# Calculate expected value
+expected_value = (
+    tp * tp_benefit - 
+    fp * fp_cost - 
+    fn * fn_cost + 
+    tn * tn_benefit
+) / len(y_test)
+
+roi = (expected_value / avg_intervention_cost - 1) * 100
+```
+**Human Action**: Defined business costs, calculated 234.8% ROI, created implementation roadmap
 
 ### Human Expertise Evidence
-- Choice to focus on seller relations (not customer marketing)
-- Selection of delivery performance as key metric
-- Identification of 97.2% one-time buyer crisis
-- Geographic concentration risk assessment
-- RFM thresholds adapted for Brazilian e-commerce
-- CLV calculation considering single-purchase dominance
-- Strategic recommendations based on industry knowledge
+- Identified critical 97.2% one-time buyer pattern
+- Discovered delivery performance varies by 41% across categories
+- Found $96,476 in data anomalies requiring business attention
+- Designed seller-focused strategy (not customer-focused)
+- Created 3-tier seller performance framework
+- Calculated $470 intervention ROI opportunity
+- Proposed regional expansion to reduce São Paulo dependency
 
-### Conclusion
-This analysis demonstrates responsible AI usage where:
+### Tools and Models Used
+- **Claude 3.5 Sonnet**: Primary LLM for code assistance
+- **Usage Pattern**: Iterative development with human validation
+- **Prompting Strategy**: Specific technical queries with business context
+- **Validation**: All AI-generated code tested and refined by human
 1. Humans drove all strategic decisions (80% of value)
 2. AI provided technical assistance (20% time savings)
 3. Business expertise remained central (100% human)
@@ -1225,7 +1316,11 @@ dash_app.layout = html.Div([
         html.H1("Brazilian E-Commerce Analysis Dashboard", 
                style={'textAlign': 'center', 'color': '#2c3e50', 'marginBottom': 10}),
         html.P("Comprehensive Analysis with Delivery Performance, Customer Segmentation, and Predictive Insights",
-               style={'textAlign': 'center', 'color': '#7f8c8d', 'fontSize': 18})
+               style={'textAlign': 'center', 'color': '#7f8c8d', 'fontSize': 18}),
+        html.P("Dr. Piyush Chaturvedi", 
+               style={'textAlign': 'center', 'color': '#34495e', 'fontSize': 16, 'fontWeight': 'bold', 'marginTop': 10}),
+        html.P("Advisory and Analytics - World Bank | Lead Consultant - National Health Authority - MoHFW",
+               style={'textAlign': 'center', 'color': '#7f8c8d', 'fontSize': 14, 'fontStyle': 'italic'})
     ], style={'backgroundColor': '#ecf0f1', 'padding': '20px', 'marginBottom': '20px'}),
     
     # Key Metrics Row
