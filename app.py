@@ -2496,10 +2496,6 @@ dash_app.layout = html.Div([
                     dcc.Dropdown(
                         id='doc-selector',
                         options=[
-                            {'label': 'Main Analysis Notebook (olist_ecommerce_analysis.ipynb)', 
-                             'value': 'olist_ecommerce_analysis.ipynb'},
-                            {'label': 'Predictive Model Notebook (predictive_analysis.ipynb)', 
-                             'value': 'predictive_analysis.ipynb'},
                             {'label': 'Analysis Notebook - Full Output (HTML)', 
                              'value': 'olist_ecommerce_analysis.html'},
                             {'label': 'Predictive Analysis - Full Output (HTML)', 
