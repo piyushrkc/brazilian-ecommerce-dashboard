@@ -1,0 +1,15 @@
+2025-08-05 19:42:58,531 - INFO - 🚀 Starting Brazilian E-Commerce Analysis Pipeline
+2025-08-05 19:42:58,532 - INFO - Output directory: /Users/piyush/Projects/ZENO Health
+2025-08-05 19:42:58,532 - INFO - ================================================================================
+2025-08-05 19:42:58,532 - INFO - Checking Python package requirements...
+2025-08-05 19:42:59,013 - INFO - NumExpr defaulting to 8 threads.
+2025-08-05 19:42:59,294 - INFO - ✅ pandas - OK
+2025-08-05 19:42:59,295 - INFO - ✅ numpy - OK
+2025-08-05 19:42:59,413 - INFO - ✅ matplotlib - OK
+2025-08-05 19:43:00,850 - INFO - ✅ seaborn - OK
+2025-08-05 19:43:00,851 - INFO - ✅ plotly - OK
+2025-08-05 19:43:00,851 - ERROR - ❌ scikit-learn - MISSING
+2025-08-05 19:43:00,852 - INFO - ✅ jupyter - OK
+2025-08-05 19:43:00,852 - ERROR - Missing packages: scikit-learn
+2025-08-05 19:43:00,852 - ERROR - Install with: pip install -r requirements.txt
+2025-08-05 19:43:00,852 - ERROR - ❌ Requirements check failed. Exiting.

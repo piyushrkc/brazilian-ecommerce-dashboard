@@ -1,0 +1,14 @@
+Brazilian E-Commerce Data Quality Report
+==================================================
+Generated: 2025-08-05 19:38:52
+
+TOP DATA ANOMALIES:
+1. 🚨 SEVERE: 39 orders delayed >100 days (max: 188.0 days)
+2. 🚨 SUSPICIOUS: 41 items with freight >5x product price (max ratio: 26.2x)
+3. 🚨 SUSPICIOUS: 39 customers appear in multiple states
+4. 🚨 SUSPICIOUS: 95234 orders with payment/order total mismatch >5%
+5. 🚨 EXTREME: 30 products with extreme dimensions
+6. 🚨 GEOGRAPHIC: 29 coordinates outside Brazil bounds
+7. 🚨 WORKFLOW: 1373 orders with impossible timestamp sequences
+
+TOTAL ANOMALIES: 7
